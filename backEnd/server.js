@@ -1,15 +1,18 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const path = require('path')
 require('dotenv').config();
-
 port = 3000;
+
 const app = express();
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
-const uri = "mongodb+srv://cvm:<password>@badminton.yzngbua.mongodb.net/?retryWrites=true&w=majority&appName=badminton";
+
+const mongoose = require('mongoose');
+
+const uri = "mongodb+srv://cvm:simple1@badminton.yzngbua.mongodb.net/?retryWrites=true&w=majority&appName=badminton";
 
 mongoose.connect(uri, {
     useNewUrlParser: true,
@@ -23,6 +26,9 @@ db.once('open', () => {
 });
 
 
+
+
+
 // Define a schema and model for bookings
 const bookingSchema = new mongoose.Schema({
     email: String,
@@ -31,26 +37,27 @@ const bookingSchema = new mongoose.Schema({
     duration: String
 });
 
-const Booking = mongoose.model('Booking', bookingSchema);
 
-app.post('/submit_booking',(req,res)=>{
+const Booking = mongoose.model('Booking', bookingSchema);
+app.post('/submit_booking',async (req,res)=>{
+    console.log("req is " + req);
+
     const newBooking = new Booking(req.body);
-    newBooking.save((err)=>{
-        if(err){
-            req.status(500).send('Error saving booking');
-        }else{
-            req.status(200).send('Booking saved sucessfully');
-        }
-    });
+    console.log(newBooking);
+    newBooking.save().then(()=>res.send("success")
+).catch(e=>console.log(e));
 })
 
 
 app.get('/',(req,res)=>{
-    res.sendFile(__dirname + '/../frontEnd/index.html');
+    dirName = path.resolve("../frontEnd/index.html" );
+    console.log(dirName);
+
+    res.sendFile(dirName);
     // i think here is an error
 });
 
 app.listen(port, ()=>{
-    console.log("server is running in " + process.env.PORT )
+    console.log("server is running in " + port )
 });
 
